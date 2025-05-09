@@ -12,7 +12,6 @@ import { SensorSpeciaalChecker } from "./checkers/SensorSpeciaalChecker.js";
 import { SensorBrugChecker } from "./checkers/SensorBrugChecker.js";
 import { VoorrangsVoertuigChecker } from "./checkers/VoorrangsVoertuigChecker.js";
 
-// ESM __dirname fix
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 

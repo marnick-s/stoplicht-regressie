@@ -8,8 +8,14 @@ export class StoplichtenChecker extends Checker {
     check(msg) {
         const errors = [];
         const keys = Object.keys(msg);
+        // 81.1 verplicht aanwezig
+        if (!keys.includes("81.1")) {
+            errors.push("Stoplicht 81.1 ontbreekt");
+        }
+        const allowedLanes = new Set(this.expectedLanes);
+        allowedLanes.add("81.1");
         const missing = [...this.expectedLanes].filter(k => !keys.includes(k));
-        const extra = keys.filter(k => !this.expectedLanes.has(k));
+        const extra = keys.filter(k => !allowedLanes.has(k));
         if (missing.length)
             errors.push(`Ontbrekende lanes: ${missing.join(", ")}`);
         if (extra.length)
