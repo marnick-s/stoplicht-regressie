@@ -47,22 +47,49 @@ async function main(): Promise<void> {
       registry.topics().forEach((topic: string) => sock.subscribe(topic));
       console.log("Abonneert op topics:", registry.topics().join(", "));
 
+      let lastTimeReal = 0;
+      let hasReceivedTime = false;
+
+      // Interval checker om waarschuwing te geven
+      setInterval(() => {
+        if (!hasReceivedTime) return;
+        const delta = Date.now() - lastTimeReal;
+        if (delta > 1000) {
+          console.warn(`[simulator][tijd] Waarschuwing: geen tijdbericht ontvangen in ${delta}ms`);
+        }
+      }, 500);
+
       for await (const [topicBuf, msgBuf] of sock) {
         const topic = topicBuf.toString();
         const payload = msgBuf.toString();
         let parsed: any;
-        try { parsed = JSON.parse(payload); } catch (err: any) {
+
+        try {
+          parsed = JSON.parse(payload);
+        } catch (err: any) {
           console.error(`[${topic}] Ongeldige JSON: ${err.message}`);
           continue;
         }
+
+        if (topic === "tijd") {
+          hasReceivedTime = true;
+          lastTimeReal = Date.now();
+        }
+
         const checker = registry.get(topic);
-        if (!checker) { console.warn(`Geen checker voor topic ${topic}`); continue; }
+        if (!checker) {
+          console.warn(`Geen checker voor topic ${topic}`);
+          continue;
+        }
+
         const { success, errors } = checker.check(parsed);
         const source = topic === "stoplichten" ? "controller" : "simulator";
-        if (success) console.log(`[${source}][${topic}] Alles correct`);
-        else {
+
+        if (success) {
+          console.log(`[${source}][${topic}] Alles correct`);
+        } else {
           console.error(`[${source}][${topic}] Fouten:`);
-          errors.forEach((e: string) => console.error(' -', e));
+          errors.forEach((e: string) => console.error(" -", e));
         }
       }
     });

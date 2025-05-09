@@ -7,6 +7,7 @@ import { LaneLoader } from "./LaneLoader.js";
 import { CheckerRegistry } from "./CheckerRegistry.js";
 import { StoplichtenChecker } from "./checkers/StoplichtenChecker.js";
 import { SensorenRijbaanChecker } from "./checkers/SensorenRijbaanChecker.js";
+import { TijdChecker } from "./checkers/TijdChecker.js";
 import { SensorSpeciaalChecker } from "./checkers/SensorSpeciaalChecker.js";
 import { SensorBrugChecker } from "./checkers/SensorBrugChecker.js";
 import { VoorrangsVoertuigChecker } from "./checkers/VoorrangsVoertuigChecker.js";
@@ -28,7 +29,7 @@ async function main() {
         const registry = new CheckerRegistry();
         registry.register("stoplichten", new StoplichtenChecker(expectedLanes));
         registry.register("sensoren_rijbaan", new SensorenRijbaanChecker(expectedLanes));
-        // registry.register("tijd", new TijdChecker());
+        registry.register("tijd", new TijdChecker());
         registry.register("sensoren_speciaal", new SensorSpeciaalChecker());
         registry.register("sensoren_bruggen", new SensorBrugChecker());
         registry.register("voorrangsvoertuig", new VoorrangsVoertuigChecker());
@@ -39,6 +40,17 @@ async function main() {
         console.log(`Verbonden met simulator op ${opts.simulator}`);
         registry.topics().forEach((topic) => sock.subscribe(topic));
         console.log("Abonneert op topics:", registry.topics().join(", "));
+        let lastTimeReal = 0;
+        let hasReceivedTime = false;
+        // Interval checker om waarschuwing te geven
+        setInterval(() => {
+            if (!hasReceivedTime)
+                return;
+            const delta = Date.now() - lastTimeReal;
+            if (delta > 1000) {
+                console.warn(`[simulator][tijd] Waarschuwing: geen tijdbericht ontvangen in ${delta}ms`);
+            }
+        }, 500);
         for await (const [topicBuf, msgBuf] of sock) {
             const topic = topicBuf.toString();
             const payload = msgBuf.toString();
@@ -50,6 +62,10 @@ async function main() {
                 console.error(`[${topic}] Ongeldige JSON: ${err.message}`);
                 continue;
             }
+            if (topic === "tijd") {
+                hasReceivedTime = true;
+                lastTimeReal = Date.now();
+            }
             const checker = registry.get(topic);
             if (!checker) {
                 console.warn(`Geen checker voor topic ${topic}`);
@@ -57,11 +73,12 @@ async function main() {
             }
             const { success, errors } = checker.check(parsed);
             const source = topic === "stoplichten" ? "controller" : "simulator";
-            if (success)
+            if (success) {
                 console.log(`[${source}][${topic}] Alles correct`);
+            }
             else {
                 console.error(`[${source}][${topic}] Fouten:`);
-                errors.forEach((e) => console.error(' -', e));
+                errors.forEach((e) => console.error(" -", e));
             }
         }
     });

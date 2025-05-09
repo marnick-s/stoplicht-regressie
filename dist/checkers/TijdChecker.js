@@ -10,7 +10,7 @@ export class TijdChecker extends Checker {
         }
         else {
             if (lastTime !== null && tijd - lastTime > 100) {
-                errors.push(`Tijd tussen berichten is te groot: ${tijd - lastTime}ms. Mogelijk is de verbinding verbroken.`);
+                errors.push(`Tijd tussen berichten is te groot: ${tijd - lastTime}ms.`);
             }
             lastTime = tijd;
         }
