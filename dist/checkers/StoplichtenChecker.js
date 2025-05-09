@@ -8,7 +8,6 @@ export class StoplichtenChecker extends Checker {
     check(msg) {
         const errors = [];
         const keys = Object.keys(msg);
-        // 81.1 verplicht aanwezig
         if (!keys.includes("81.1")) {
             errors.push("Stoplicht 81.1 ontbreekt");
         }

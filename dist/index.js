@@ -7,11 +7,9 @@ import { LaneLoader } from "./LaneLoader.js";
 import { CheckerRegistry } from "./CheckerRegistry.js";
 import { StoplichtenChecker } from "./checkers/StoplichtenChecker.js";
 import { SensorenRijbaanChecker } from "./checkers/SensorenRijbaanChecker.js";
-import { TijdChecker } from "./checkers/TijdChecker.js";
 import { SensorSpeciaalChecker } from "./checkers/SensorSpeciaalChecker.js";
 import { SensorBrugChecker } from "./checkers/SensorBrugChecker.js";
 import { VoorrangsVoertuigChecker } from "./checkers/VoorrangsVoertuigChecker.js";
-// ESM __dirname fix
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 async function main() {
@@ -30,7 +28,7 @@ async function main() {
         const registry = new CheckerRegistry();
         registry.register("stoplichten", new StoplichtenChecker(expectedLanes));
         registry.register("sensoren_rijbaan", new SensorenRijbaanChecker(expectedLanes));
-        registry.register("tijd", new TijdChecker());
+        // registry.register("tijd", new TijdChecker());
         registry.register("sensoren_speciaal", new SensorSpeciaalChecker());
         registry.register("sensoren_bruggen", new SensorBrugChecker());
         registry.register("voorrangsvoertuig", new VoorrangsVoertuigChecker());
