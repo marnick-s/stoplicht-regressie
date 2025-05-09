@@ -68,7 +68,7 @@ async function main() {
             }
             const checker = registry.get(topic);
             if (!checker) {
-                console.warn(`Geen checker voor topic ${topic}`);
+                console.warn(`[onbekend] Bericht ontvangen op niet-bestaand topic "${topic}"`);
                 continue;
             }
             const { success, errors } = checker.check(parsed);
