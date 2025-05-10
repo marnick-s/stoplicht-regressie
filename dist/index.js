@@ -26,6 +26,7 @@ async function main() {
         .action(async (opts) => {
         const loader = new LaneLoader(path.resolve(__dirname, "../lanes.json"));
         const expectedLanes = loader.getExpectedLanes();
+        const lastMessages = new Map();
         const registry = new CheckerRegistry();
         registry.register("stoplichten", new StoplichtenChecker(expectedLanes));
         registry.register("sensoren_rijbaan", new SensorenRijbaanChecker(expectedLanes));
@@ -70,6 +71,14 @@ async function main() {
             if (!checker) {
                 console.warn(`[onbekend] Bericht ontvangen op niet-bestaand topic "${topic}"`);
                 continue;
+            }
+            const msgString = JSON.stringify(parsed);
+            const previousMsg = lastMessages.get(topic);
+            if (previousMsg === msgString) {
+                console.warn(`[${topic}] Waarschuwing: bericht is identiek aan het vorige bericht op hetzelfde topic.`);
+            }
+            else {
+                lastMessages.set(topic, msgString);
             }
             const { success, errors } = checker.check(parsed);
             const source = topic === "stoplichten" ? "controller" : "simulator";
