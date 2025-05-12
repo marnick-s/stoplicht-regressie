@@ -3,11 +3,14 @@ export class SensorenRijbaanChecker extends Checker {
     constructor(expectedLanes) {
         super("sensoren_rijbaan");
         this.expectedLanes = expectedLanes;
+        this.exceptions = new Set(["61.1", "62.1", "63.1", "64.1"]);
     }
     check(msg) {
         const errors = [];
-        const keys = Object.keys(msg);
-        const missing = [...this.expectedLanes].filter(k => !keys.includes(k));
+        const keys = Object.keys(msg).filter(k => !this.exceptions.has(k));
+        const missing = [...this.expectedLanes]
+            .filter(k => !this.exceptions.has(k))
+            .filter(k => !keys.includes(k));
         const extra = keys.filter(k => !this.expectedLanes.has(k));
         if (missing.length)
             errors.push(`Ontbrekende lanes: ${missing.join(", ")}`);
