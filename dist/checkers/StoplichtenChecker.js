@@ -2,8 +2,9 @@ import { Checker } from "./Checker.js";
 export class StoplichtenChecker extends Checker {
     constructor(expectedLanes) {
         super("stoplichten");
-        this.expectedLanes = expectedLanes;
         this.validColors = new Set(["rood", "oranje", "groen"]);
+        const forbiddenLanes = new Set(["61.1", "62.1", "63.1", "64.1"]);
+        this.expectedLanes = new Set([...expectedLanes].filter(lane => !forbiddenLanes.has(lane)));
     }
     check(msg) {
         const errors = [];
@@ -15,10 +16,12 @@ export class StoplichtenChecker extends Checker {
         allowedLanes.add("81.1");
         const missing = [...this.expectedLanes].filter(k => !keys.includes(k));
         const extra = keys.filter(k => !allowedLanes.has(k));
-        if (missing.length)
+        if (missing.length) {
             errors.push(`Ontbrekende lanes: ${missing.join(", ")}`);
-        if (extra.length)
+        }
+        if (extra.length) {
             errors.push(`Onbekende lanes: ${extra.join(", ")}`);
+        }
         for (const lane of keys) {
             const kleur = String(msg[lane]);
             if (!this.validColors.has(kleur)) {

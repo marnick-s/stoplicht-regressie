@@ -21,9 +21,12 @@ async function main() {
         .version("0.1.0");
     program
         .command("test")
-        .option("-c, --controller <addr>", "Controller address", "tcp://localhost:5555")
-        .option("-s, --simulator <addr>", "Simulator address", "tcp://localhost:5556")
+        .option("--controller <ip>", "IP-adres van controller (poort 5555)", "127.0.0.1")
+        .option("--simulator <ip>", "IP-adres van simulator (poort 5556)", "127.0.0.1")
         .action(async (opts) => {
+        // Voeg tcp:// en poort toe
+        const controllerAddress = `tcp://${opts.controller}:5555`;
+        const simulatorAddress = `tcp://${opts.simulator}:5556`;
         const loader = new LaneLoader(path.resolve(__dirname, "../lanes.json"));
         const expectedLanes = loader.getExpectedLanes();
         const lastMessages = new Map();
@@ -35,15 +38,14 @@ async function main() {
         registry.register("sensoren_bruggen", new SensorBrugChecker());
         registry.register("voorrangsvoertuig", new VoorrangsVoertuigChecker());
         const sock = new Subscriber();
-        sock.connect(opts.controller);
-        sock.connect(opts.simulator);
-        console.log(`Verbonden met controller op ${opts.controller}`);
-        console.log(`Verbonden met simulator op ${opts.simulator}`);
+        sock.connect(controllerAddress);
+        sock.connect(simulatorAddress);
+        console.log(`Verbonden met controller op ${controllerAddress}`);
+        console.log(`Verbonden met simulator op ${simulatorAddress}`);
         registry.topics().forEach((topic) => sock.subscribe(topic));
         console.log("Abonneert op topics:", registry.topics().join(", "));
         let lastTimeReal = 0;
         let hasReceivedTime = false;
-        // Interval checker om waarschuwing te geven
         setInterval(() => {
             if (!hasReceivedTime)
                 return;

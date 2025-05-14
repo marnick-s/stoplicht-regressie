@@ -3,9 +3,15 @@ import { RawMsg, CheckResult } from "../interfaces.js";
 
 export class StoplichtenChecker extends Checker {
   private validColors = new Set<string>(["rood", "oranje", "groen"]);
+  private expectedLanes: Set<string>;
 
-  constructor(private expectedLanes: Set<string>) {
+  constructor(expectedLanes: Set<string>) {
     super("stoplichten");
+
+    const forbiddenLanes = new Set(["61.1", "62.1", "63.1", "64.1"]);
+    this.expectedLanes = new Set(
+      [...expectedLanes].filter(lane => !forbiddenLanes.has(lane))
+    );
   }
 
   check(msg: RawMsg): CheckResult {
@@ -22,8 +28,13 @@ export class StoplichtenChecker extends Checker {
     const missing = [...this.expectedLanes].filter(k => !keys.includes(k));
     const extra = keys.filter(k => !allowedLanes.has(k));
 
-    if (missing.length) errors.push(`Ontbrekende lanes: ${missing.join(", ")}`);
-    if (extra.length) errors.push(`Onbekende lanes: ${extra.join(", ")}`);
+    if (missing.length) {
+      errors.push(`Ontbrekende lanes: ${missing.join(", ")}`);
+    }
+
+    if (extra.length) {
+      errors.push(`Onbekende lanes: ${extra.join(", ")}`);
+    }
 
     for (const lane of keys) {
       const kleur = String(msg[lane]);
