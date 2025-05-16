@@ -1,3 +1,5 @@
+### To build:
 npm run build
 
-node dist/index.js send "Hallo"
+### To start:
+node dist/index.js test
