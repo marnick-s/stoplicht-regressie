@@ -1,6 +1,15 @@
 import { Checker } from "./Checker.js";
 import { RawMsg, CheckResult } from "../interfaces.js";
 
+/**
+ * Checker for validating the structure and values of bridge sensor messages.
+ * 
+ * This class ensures that the message contains only the allowed key "81.1",
+ * and that its value is an object with a `state` property of type string.
+ * The `state` must be one of the allowed values: "open", "dicht", or "onbekend".
+ * 
+ * @extends Checker
+ */
 export class SensorBrugChecker extends Checker {
   private allowedStates = new Set(["open", "dicht", "onbekend"]);
 

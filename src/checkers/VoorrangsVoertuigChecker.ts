@@ -2,6 +2,19 @@
 import { Checker } from "./Checker.js";
 import { RawMsg, CheckResult } from "../interfaces.js";
 
+/**
+ * A checker for validating 'voorrangsvoertuig' (priority vehicle) messages.
+ * 
+ * This class validates that:
+ * - The 'queue' field is an array
+ * - Each queue item has the required fields:
+ *   - 'baan' (lane) - must be a string
+ *   - 'simulatie_tijd_ms' (simulation time in ms) - must be a number
+ *   - 'prioriteit' (priority) - must be a number
+ * - No unexpected fields are present in queue items
+ * 
+ * @extends Checker
+ */
 export class VoorrangsVoertuigChecker extends Checker {
   constructor() {
     super("voorrangsvoertuig");

@@ -1,6 +1,26 @@
 import { Checker } from "./Checker.js";
 import { RawMsg, CheckResult } from "../interfaces.js";
 
+/**
+ * A checker class for validating stoplight (traffic light) messages.
+ * 
+ * The `StoplichtenChecker` verifies that a given message contains the expected stoplight lanes,
+ * ensures that only valid stoplight colors are present, and checks for missing or unknown lanes.
+ * 
+ * - Only the colors "rood", "oranje", and "groen" are considered valid.
+ * - Lanes "61.1", "62.1", "63.1", and "64.1" are forbidden and automatically excluded from the expected lanes.
+ * - Lane "81.1" is always required and allowed.
+ * 
+ * @extends Checker
+ * 
+ * @example
+ * ```typescript
+ * const checker = new StoplichtenChecker(new Set(["81.1", "82.1"]));
+ * const result = checker.check({ "81.1": "groen", "82.1": "rood" });
+ * ```
+ * 
+ * @param expectedLanes - The set of expected lane identifiers (excluding forbidden lanes).
+ */
 export class StoplichtenChecker extends Checker {
   private validColors = new Set<string>(["rood", "oranje", "groen"]);
   private expectedLanes: Set<string>;

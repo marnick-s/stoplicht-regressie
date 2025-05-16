@@ -1,4 +1,17 @@
 import { Checker } from "./Checker.js";
+/**
+ * Checker class for validating "sensoren_speciaal" messages.
+ *
+ * This class verifies that a given message contains exactly the expected keys:
+ * - "brug_wegdek"
+ * - "brug_water"
+ * - "brug_file"
+ *
+ * It checks for missing or unknown keys and ensures that the values for each expected key are booleans.
+ * Any validation errors are collected and returned in the result.
+ *
+ * @extends Checker
+ */
 export class SensorSpeciaalChecker extends Checker {
     constructor() {
         super("sensoren_speciaal");

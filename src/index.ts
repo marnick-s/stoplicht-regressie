@@ -12,29 +12,38 @@ import { SensorSpeciaalChecker } from "./checkers/SensorSpeciaalChecker.js";
 import { SensorBrugChecker } from "./checkers/SensorBrugChecker.js";
 import { VoorrangsVoertuigChecker } from "./checkers/VoorrangsVoertuigChecker.js";
 
+// Get current file path and directory
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Main async function
 async function main(): Promise<void> {
   const program = new Command();
+
+  // Define CLI program metadata
   program
     .name("zmq-tester")
     .description("Tester voor ZeroMQ berichten")
     .version("0.1.0");
 
+  // Define the 'test' command and its options
   program
     .command("test")
     .option("--controller <ip>", "IP-adres van controller (poort 5555)", "127.0.0.1")
     .option("--simulator <ip>", "IP-adres van simulator (poort 5556)", "127.0.0.1")
     .action(async (opts: { controller: string; simulator: string }) => {
-      // Voeg tcp:// en poort toe
+      // Construct full ZeroMQ addresses
       const controllerAddress = `tcp://${opts.controller}:5555`;
       const simulatorAddress = `tcp://${opts.simulator}:5556`;
 
+      // Load expected lane configuration from JSON
       const loader = new LaneLoader(path.resolve(__dirname, "../lanes.json"));
       const expectedLanes = loader.getExpectedLanes();
+
+      // Track last received messages by topic to detect duplicates
       const lastMessages = new Map<string, string>();
 
+      // Register topic-specific checkers
       const registry = new CheckerRegistry();
       registry.register("stoplichten", new StoplichtenChecker(expectedLanes));
       registry.register("sensoren_rijbaan", new SensorenRijbaanChecker(expectedLanes));
@@ -43,18 +52,21 @@ async function main(): Promise<void> {
       registry.register("sensoren_bruggen", new SensorBrugChecker());
       registry.register("voorrangsvoertuig", new VoorrangsVoertuigChecker());
 
+      // Create and connect subscriber socket
       const sock = new Subscriber();
       sock.connect(controllerAddress);
       sock.connect(simulatorAddress);
       console.log(`Verbonden met controller op ${controllerAddress}`);
       console.log(`Verbonden met simulator op ${simulatorAddress}`);
 
+      // Subscribe to all registered topics
       registry.topics().forEach((topic: string) => sock.subscribe(topic));
       console.log("Abonneert op topics:", registry.topics().join(", "));
 
       let lastTimeReal = 0;
       let hasReceivedTime = false;
 
+      // Periodic check to ensure time messages are received regularly
       setInterval(() => {
         if (!hasReceivedTime) return;
         const delta = Date.now() - lastTimeReal;
@@ -63,11 +75,13 @@ async function main(): Promise<void> {
         }
       }, 500);
 
+      // Listen for incoming messages from subscribed topics
       for await (const [topicBuf, msgBuf] of sock) {
         const topic = topicBuf.toString();
         const payload = msgBuf.toString();
         let parsed: any;
 
+        // Try to parse the JSON message
         try {
           parsed = JSON.parse(payload);
         } catch (err: any) {
@@ -75,17 +89,20 @@ async function main(): Promise<void> {
           continue;
         }
 
+        // Update time tracking when a time message is received
         if (topic === "tijd") {
           hasReceivedTime = true;
           lastTimeReal = Date.now();
         }
 
+        // Retrieve checker for the given topic
         const checker = registry.get(topic);
         if (!checker) {
           console.warn(`[onbekend] Bericht ontvangen op niet-bestaand topic "${topic}"`);
           continue;
         }
 
+        // Detect duplicate messages
         const msgString = JSON.stringify(parsed);
         const previousMsg = lastMessages.get(topic);
 
@@ -95,9 +112,11 @@ async function main(): Promise<void> {
           lastMessages.set(topic, msgString);
         }
 
+        // Validate message using the appropriate checker
         const { success, errors } = checker.check(parsed);
         const source = topic === "stoplichten" ? "controller" : "simulator";
 
+        // Print result of validation
         if (success) {
           console.log(`[${source}][${topic}] Alles correct`);
         } else {
@@ -107,7 +126,9 @@ async function main(): Promise<void> {
       }
     });
 
+  // Run the CLI program
   await program.parseAsync(process.argv);
 }
 
+// Start the main function and catch top-level errors
 main().catch((err: any) => console.error(err));

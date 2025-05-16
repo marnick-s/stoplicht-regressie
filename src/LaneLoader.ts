@@ -1,4 +1,12 @@
 import * as fs from "fs";
+/**
+ * A class that loads and processes lane data from a JSON file.
+ * 
+ * @class LaneLoader
+ * @export
+ * @description The LaneLoader class reads a JSON file containing lane group information,
+ * and creates a set of expected lane identifiers in the format "groupId.laneId".
+ */
 export class LaneLoader {
   private expected: Set<string> = new Set();
   constructor(filePath: string) {
