@@ -15,7 +15,6 @@ export class SensorBrugChecker extends Checker {
     }
     check(msg) {
         const errors = [];
-        console.log("msg: ", msg);
         const keys = Object.keys(msg);
         if (keys.length !== 1 || keys[0] !== "81.1") {
             errors.push("Alleen key '81.1' is toegestaan in sensoren_bruggen");

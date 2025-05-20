@@ -88,15 +88,6 @@ async function main() {
                 console.warn(`[onbekend] Bericht ontvangen op niet-bestaand topic "${topic}"`);
                 continue;
             }
-            // Detect duplicate messages
-            const msgString = JSON.stringify(parsed);
-            const previousMsg = lastMessages.get(topic);
-            if (previousMsg === msgString) {
-                console.warn(`[${topic}] Waarschuwing: bericht is identiek aan het vorige bericht op hetzelfde topic.`);
-            }
-            else {
-                lastMessages.set(topic, msgString);
-            }
             // Validate message using the appropriate checker
             const { success, errors } = checker.check(parsed);
             const source = topic === "stoplichten" ? "controller" : "simulator";

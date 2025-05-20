@@ -14,7 +14,7 @@ export class SensorenRijbaanChecker extends Checker {
         super("sensoren_rijbaan");
         this.expectedLanes = expectedLanes;
         // Set of lane keys to ignore during checking (exceptions)
-        this.exceptions = new Set(["61.1", "62.1", "63.1", "64.1"]);
+        this.exceptions = new Set(["61.1", "62.1", "63.1", "64.1", "41.1", "42.1", "51.1", "52.1", "53.1", "54.1"]);
     }
     /**
      * Checks the given message for missing, extra, or invalid lane data.

@@ -10,7 +10,7 @@ import { CheckResult, RawMsg } from "../interfaces.js";
  */
 export class SensorenRijbaanChecker extends Checker {
   // Set of lane keys to ignore during checking (exceptions)
-  private exceptions = new Set(["61.1", "62.1", "63.1", "64.1"]);
+  private exceptions = new Set(["61.1", "62.1", "63.1", "64.1", "41.1", "42.1", "51.1", "52.1", "53.1", "54.1"]);
 
   /**
    * @param expectedLanes Set of lane keys that are expected in the message
